@@ -19,3 +19,4 @@ prefix =
 아래 라이브러리 설치를 필요로 합니다.
 - requests
 - configparser
+- beautifulsoup4

@@ -1,41 +1,32 @@
 import json
 import sys
+import requests
+from bs4 import BeautifulSoup
 sys.path.append('../lib')
 import message
 
 # 한번 요청으로 1만건의 메시지 발송이 가능합니다.
 if __name__ == '__main__':
+  url = 'http://코로나19경남.kr/main/main.do'
+
+  response = requests.get(url)
+
+  if response.status_code != 200:
+    print(response.status_code)
+    exit()
+  html = response.text
+  soup = BeautifulSoup(html, 'html.parser')
+  table = soup.select_one('.city_board .table')
+  tds = table.select('table tbody tr+tr td')
+  for td in tds:
+    print(td.get_text())
   data = {
     'messages': [
       {
-        'to': '01000000001',
-        'from': '029302266',
-        'text': '한글 45자, 영자 90자 이하 입력되면 자동으로 SMS타입의 메시지가 추가됩니다.'
+        'to': '01024657784',
+        'from': '01024657784',
+        'text': '경상남도 확진자 수는 ' + tds[1].get_text() + '명입니다.'
       },
-      {
-        'to': '01000000002',
-        'from': '029302266',
-        'text': '한글 45자, 영자 90자 이상 입력되면 자동으로 LMS타입의 문자메시자가 발송됩니다. 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      },
-      {
-        'type': 'SMS',
-        'to': '01000000003',
-        'from': '029302266',
-        'text': 'SMS 타입에 한글 45자, 영자 90자 이상 입력되면 오류가 발생합니다. 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      },
-      {
-        'to': [ '01000000004', '01000000005' ], # 수신번호를 array로 입력하면 같은 내용을 여러명에게 보낼 수 있습니다.
-        'from': '029302266',
-        'text': '한글 45자, 영자 90자 이하 입력되면 자동으로 SMS타입의 메시지가 발송됩니다.'
-      },
-      {
-        'country': '1', # 미국(1), 일본(81), 중국(86) 등 국가번호 입력
-        'to': '01000000006', # 수신번호를 array로 입력하면 같은 내용을 여러명에게 보낼 수 있습니다.
-        'from': '029302266',
-        'text': '한글 45자, 영자 90자 이하 입력되면 자동으로 SMS타입의 메시지가 발송됩니다.'
-      }
-      # ...
-      # 1만건까지 추가 가능
     ]
   }
   res = message.sendMany(data)
